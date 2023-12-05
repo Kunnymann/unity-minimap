@@ -34,7 +34,7 @@ namespace minimap.runtime
                 if (item.img.texture.GetType().Equals(typeof(RenderTexture)))
                     _buildedMinimap.RenderTextures.Add(item.key, item.img.texture as RenderTexture);
                 else
-                    throw new TypeAccessException($"{item.key}의 RawImage의 Texture는 RenderTexture가 아닙니다.");
+                    throw new TypeAccessException($"[MinimapBuilder] {item.key}의 RawImage의 Texture는 RenderTexture가 아닙니다.");
             }
             
             return this;
@@ -110,7 +110,7 @@ namespace minimap.runtime
             if (_buildedMinimap.Bake(name))
                 return _buildedMinimap;
             else
-                throw new Exception("미니맵 빌드에 실패하였습니다.");
+                throw new Exception("[MinimapBuilder] 미니맵 빌드에 실패하였습니다.");
         }
     }
 }

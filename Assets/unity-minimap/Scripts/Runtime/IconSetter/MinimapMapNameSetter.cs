@@ -1,3 +1,4 @@
+using System;
 using TMPro;
 using UnityEngine;
 
@@ -22,7 +23,7 @@ namespace minimap.runtime
 
             var textComponent = instantiated.GetComponentInChildren<TextMeshProUGUI>();
             if (textComponent == null)
-                Debug.LogWarning($"{this.gameObject.name} 예하에 TextMeshPro가 존재하지 않습니다.");
+                throw new NullReferenceException($"[MinimapMapNameSetter] {this.gameObject.name} 예하에 TextMeshPro가 존재하지 않습니다.");
             else
                 textComponent.text = _mapName;
 

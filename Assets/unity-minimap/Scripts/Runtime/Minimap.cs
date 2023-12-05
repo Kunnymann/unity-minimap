@@ -64,7 +64,7 @@ namespace minimap.runtime
         public MinimapCamera MinimapCamera
         {
             get => _minimapCamera;
-            set => _minimapCamera = value;
+            internal set => _minimapCamera = value;
         }
 
         private bool _initialized;
@@ -84,24 +84,20 @@ namespace minimap.runtime
         /// </summary>
         /// <param name="name">미니맵 이름</param>
         /// <returns>성공 여부</returns>
-        public bool Bake(string name)
+        internal bool Bake(string name)
         {
             _initialized = false;
             if (_minimapCamera == null)
             {
-                Debug.LogError("미니맵 정보는 Null일 수 없습니다.");
-                return _initialized;
+                throw new NullReferenceException("[Minimap] 미니맵 정보는 Null일 수 없습니다.");
             }
         
             if (_trackingTarget == null)
             {
-                Debug.LogError("미니맵 카메라의 Tracking target이 Null일 수 없습니다.");
-                return _initialized;
+                throw new NullReferenceException("[Minimap] 미니맵 카메라의 Tracking target이 Null일 수 없습니다.");
             }
 
-            if (MinimapIcons.Count == 0)
-                Debug.LogWarning("미니맵 아이콘 정보가 없으므로, 미니맵에 별도 아이콘을 표기하지 않습니다.");
-            else
+            if (MinimapIcons.Count > 0)
             {
                 this._name = name;
                 int exclude = LayerMask.GetMask(MinimapRuntime.EDITOR_MINIMAP_LAYER_NAME);
@@ -146,19 +142,17 @@ namespace minimap.runtime
         {
             if (!_initialized)
             {
-                Debug.LogError("미니맵이 정상적으로 초기화되지 않았습니다.");
-                return false;
+                throw new Exception("[Minimap] 미니맵이 정상적으로 초기화되지 않았습니다.");
             }
 
             if (!_renderTextures.ContainsKey(renderTexturesKey))
             {
-                Debug.LogError($"{renderTexturesKey} 키 값은 존재하지 않습니다.");
-                return false;
+                throw new NullReferenceException($"[Minimap] {renderTexturesKey} 키 값은 존재하지 않습니다.");
             }
+
             if (_renderTextures[renderTexturesKey] == null)
             {
-                Debug.LogError($"{renderTexturesKey} 키의 Render texture가 Null입니다.");
-                return false;
+                throw new NullReferenceException($"[Minimap] {renderTexturesKey} 키의 Render texture가 Null입니다.");
             }
 
             _minimapCamera.Camera.targetTexture = _renderTextures[renderTexturesKey];
@@ -175,7 +169,7 @@ namespace minimap.runtime
         /// Runtime 중, 미니맵에 MinimapIconSetterBase를 등록합니다.
         /// </summary>
         /// <param name="target">MinimapIconSetter</param>
-        public void RegistMinimapIconInRuntime(MinimapIconSetterBase target)
+        internal void RegistMinimapIconInRuntime(MinimapIconSetterBase target)
         {
             // 이미 등록되어 있다면 무시.
             if (MinimapIconBases.ContainsKey(target))
@@ -183,7 +177,7 @@ namespace minimap.runtime
 
             if (MinimapIcons.Count == 0)
             {
-                Debug.LogWarning("미니맵 아이콘 정보가 없으므로, 미니맵에 별도 아이콘을 표기하지 않습니다.");
+                // 미니맵 아이콘 정보가 없으므로, 미니맵에 별도 아이콘을 표기하지 않음.
                 return;
             }
                 
@@ -206,7 +200,7 @@ namespace minimap.runtime
         /// Runtime 중, 미니맵에 MinimapIconSetterBase를 등록 해제합니다.
         /// </summary>
         /// <param name="target">MinimapIconSetter</param>
-        public void UnregistMinimapIconInRuntime(MinimapIconSetterBase target)
+        internal void UnregistMinimapIconInRuntime(MinimapIconSetterBase target)
         {
             if (MinimapIconBases.ContainsKey(target))
             {

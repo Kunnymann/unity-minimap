@@ -86,8 +86,7 @@ namespace minimap.runtime.camera
                 {
                     if (_camera == null)
                     {
-                        Debug.LogError("[MinimapCamera] DepthOnlyCamera와 Camera가 null입니다. DepthOnlyCamera를 초기화하기 위해서는 Camera를 초기화해야 합니다.");
-                        return null;
+                        throw new NullReferenceException("[MinimapCamera] DepthOnlyCamera와 Camera가 null입니다. DepthOnlyCamera를 초기화하기 위해서는 Camera를 초기화해야 합니다.");
                     }
                     throw new InvalidOperationException("[MinimapCamera] 비정상적인 Operation으로 인해, DepthOnlyCamera가 null입니다.");
                 }

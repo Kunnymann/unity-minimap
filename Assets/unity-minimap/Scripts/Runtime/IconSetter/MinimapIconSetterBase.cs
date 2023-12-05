@@ -49,7 +49,7 @@ namespace minimap.runtime
         {
             if (_minimapIcon == null)
             {
-                throw new NullReferenceException($"{this.gameObject.name}에 미니맵 아이콘 프리팹이 주입되지 않았습니다.");
+                throw new NullReferenceException($"[MinimapIconSetterBase] {this.gameObject.name}에 미니맵 아이콘 프리팹이 주입되지 않았습니다.");
             }
             else
             {
