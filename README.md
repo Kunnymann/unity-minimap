@@ -1,26 +1,40 @@
-# Unity-dynamic-minimap
-
-## Readme 업데이트 진행 중...
+# dynamic-minimap
 
 ## 목적
 
-동적으로 미니맵을 생성하고, 이를 유동적으로 관리하기 위한 목표로 설계된 패키지
+동적으로 미니맵을 생성하고, 상황에 유연하게 대응하기 위함을 목적으로 하고 있습니다.
 
-## 구성
+## 요약
 
-### Minimap Creator
+필요한 상황에 맞게, 다양하게 미니맵을 커스터마이징 할 수 있습니다. 단일의 미니맵부터 복수개의 미니맵, Perspective, Orthographic 아이콘 그리고 미니맵 상호작용까지 지원합니다.
 
-기본적으로 제공되는 미니맵 Setter (Perspective/Orthographic) 혹은 커스터마이징된 미니맵 Setter의 Format을 ScriptableObject 형태로 생성하여, Asset 파일 형태로 떨어뜨려 놓습니다. Project View -> Create -> MinimapCreator로부터 ScriptableObject를 생성할 수 있습니다.
+### Minimap Builder
 
-### Minimap Setter
+미니맵을 생성하기 위한 빌더입니다. 기본적인 주조틀 (Minimap Base)를 바탕으로, 지정된 속성에 맞게 미니맵을 동적으로 생성할 것입니다.
+최종적으로 Build 명령의 파라미터로 미니맵의 **Name**을 결정할 수 있습니다.
 
-Minimap을 동적으로 생성하기 위한 주조틀입니다. 패키지에는 기본적으로 Perspective, Orthographic이 존재합니다.
+```csharp
+MinimapBuilder minimapBuilder = new MinimapBuilder();
 
-#### Orthographic Minimap Setter
+_minimap = minimapBuilder.SetBase(_minimapBase)
+    .SetRenderTextureInRawImage(("Basic minimap", _defaultMinimapRawImage))
+    .SetTrackingTarget(_trackingTarget.transform)
+    .Build("DefaultMinimap");   // 해당 미니맵의 Name은 DefaultMinimap
+```
 
-![image](./Assets/unity-minimap/Resources/Editor/Minimap/Image/img_orthographic.png)
+### Minimap Base
 
-Orthographic Camera로 구성된 Minimap Setter입니다. Inspector에 나타나는 프로퍼티는 다음과 같습니다.
+프로젝트의 가장 중요 미니맵 주조틀입니다. 현재로는 Perspective Base, Orthographic Base 두 가지를 제공하고 있으며, 필요에 의해 커스터마이징된 Base를 새로 구현할 수 있습니다.
+
+![image](./Image/img_minimap_base.png)
+
+제공된 두 가지의 Base는 Project view에서 생성할 수 있습니다.
+
+#### Orthographic Minimap Base
+
+![image](./Image/img_orthographic.png)
+
+Orthographic Camera로 구성된 Minimap Base입니다. Inspector에 나타나는 프로퍼티는 다음과 같습니다.
 
 | Property                | Type  | Detail                                                            |
 |-------------------------|-------|-------------------------------------------------------------------|
@@ -33,11 +47,11 @@ Orthographic Camera로 구성된 Minimap Setter입니다. Inspector에 나타나
 | Max Size                | int   | Orthographic Camera의 최대 Zoom 사이즈 (Default Size와 Dependency) |
 | Move Speed              | float | Minimap 이동 속도                                                 |
 
-#### Perspective Minimap Setter
+#### Perspective Minimap Base
 
-![image](./Assets/unity-minimap/Resources/Editor/Minimap/Image/img_perspective.png)
+![image](./Image/img_perspective.png)
 
-Perspective Camera로 구성된 Minimap Setter입니다. Inspector에 나타나는 프로퍼티는 다음과 같습니다.
+Perspective Camera로 구성된 Minimap Base입니다. Inspector에 나타나는 프로퍼티는 다음과 같습니다.
 
 | Property                | Type  | Detail                                                                        |
 |-------------------------|-------|-------------------------------------------------------------------------------|
@@ -54,7 +68,7 @@ Perspective Camera로 구성된 Minimap Setter입니다. Inspector에 나타나�
 
 #### 공통 사항
 
-Minimap Setter가 공통적으로 갖는 프로퍼티입니다.
+Minimap Base가 공통적으로 갖는 프로퍼티입니다.
 
 | World Configuration | Type    | Detail     |
 |---------------------|---------|------------|
@@ -67,21 +81,49 @@ Minimap Setter가 공통적으로 갖는 프로퍼티입니다.
 | Tag           | string     | 미니맵 아이콘이 할당될 Tag |
 | Icon Prefab   | GameObject | 생성될 아이콘 프리팹       |
 
-미니맵은 Runtime에 빌드되어 사용될 때, Tag 기반으로 대상 GameObject를 실시간으로 찾습니다. 물론, Scene내 모든 GameObject를 대상으로 찾는게 아닙니다.
+미니맵은 Runtime에 빌드되어 사용될 때, Tag 기반으로 Scene내 대상 GameObject를 실시간으로 찾습니다.
 
 ### MinimapIconSetterBase
 
-해당 Component가 붙은 GameObject를 대상으로 탐색을 진행하며, 찾은 GameObject의 Tag가 MinimapSetter에 지정된 아이템과 동일하다면, 동적으로 생성하여 Minimap Texture에서 해당 아이콘이 보이도록 합니다. 이 때, MinimapIconSetterBase는 Minimap Setter를 필드로 할당되어야 합니다.
+![image](./Image/img_minimap_icon_setter_base.png)
 
-### 특징
+여러분들이 생성한 미니맵은 미니맵에 렌더링할 게임 오브젝트의 아이콘을 생성하게 됩니다. 해당 Component가 붙은 GameObject를 대상으로 탐색을 진행하며, 찾은 대상의 MinimapIconSetterBase 내 Minimap Name 필드로 명명된 미니맵 인스턴스를 찾습니다. 그 후, 해당 인스턴스의 MinimapBase에 등록한 아이콘 중, 아이콘을 렌더링할 게임 오브젝트의 태그와 동일한 아이콘 프리팹을 동적으로 생성합니다.
 
-해당 패키지의 특징은 단일의 미니맵 인스턴스를 지향하지 않습니다. 이를테면, Top-view based minimap과 Front-view based minimap을 보여줄 수 있으니 말입니다. 따라서, 동시에 여러 개의 MinimapSetter를 Asset 파일로 생성하여 Runtime 중, 각각의 RenderTexture에 동시에 렌더링이 가능토록 합니다.
+#### MinimapTextSetter
+
+미니맵 아이콘 대신, 텍스트를 렌더링합니다. TextMeshPro가 필요합니다.
+
+### 설치
+
+1. 몇 가지 플러그인에 Dependency가 존재하므로, 중복되지 않는지 확인하시길 바랍니다.
+
+| name        | url                                | version |
+|-------------|------------------------------------|---------|
+| UniRX       | https://github.com/neuecc/UniRx    | 7.1.0   |
+| TextMeshPro | Unity package manager              | 3.0.6   |
+
+2. Unity Package를 다운 받아, Import합니다.
 
 ### 사용법
 
-미니맵 빌드
+1. 원하는 MinimapBase를 생성하여, 설정합니다.
+2. 미니맵에 아이콘을 랜더링시킬 GameObject에 적정한 태그를 등록합니다.
 
+![image](./Image/img_guide_01.png)
+
+3. 아이콘 프리팹을 생성한 후, Layer를 MinimapIcon으로 바꿉니다.
+
+![image](./Image/img_guide_02.png)
+
+4. 이제, 생성된 MinimapBase에 앞서 제작한 미니맵 아이콘을 할당해 줍니다.
+
+![image](./Image/img_guide_03.png)
+
+5. 메인 카메라의 Culling Mask에서 MinimapIcon Layer를 제거합니다.
+6. 미니맵 빌드 코드를 작성합니다.
 ```csharp
+using minimap.runtime;
+...
 
 MinimapSetter _minimapCamera;   // ScriptableObject 형태의 MinimapSetter
 GameObject _trackingTarget;     // Minimap Camera의 Tracking target
@@ -94,15 +136,15 @@ private void Start ()
 {
     MinimapBuilder minimapBuilder = new MinimapBuilder();
 
-    _minimap = minimapBuilder.SetMinimapCamera(_minimapCamera)
-        .SetRenderTextureInRawImage(("Basic minimap", _defaultMinimapRawImage),     // 한 미니맵은 여러 RenderTexture를 가질 수 있음
-                                    ("Extended minimap", _extendedMinimapRawImage)) // Basic minimap키와 Extended minimap키의 RenderTexture들이 등록됨
-        .AddOnChangeListener(("Basic minimap", (renderTexture) => ActiveDefaultMinimap(renderTexture)), // 각 키의 RenderTexture가 활성화 되었을 때, 발생될 이벤트 등록
+    _minimap = minimapBuilder.SetBase(_minimapBase)
+        .SetRenderTextureInRawImage(("Basic minimap", _defaultMinimapRawImage),     // Basic minimap 키의 RawImage 등록
+                                    ("Extended minimap", _extendedMinimapRawImage)) // Extended minimap 키의 RawImage 등록
+        .AddOnChangeListener(("Basic minimap", (renderTexture) => ActiveDefaultMinimap(renderTexture)), 
                                 ("Extended minimap", (renderTexture) => ActiveExtendedMinimap(renderTexture)))
         .SetTrackingTarget(_trackingTarget.transform)
-        .Build();
+        .Build("DefaultMinimap");
 
-    _minimap.Run("Basic minimap");  // 등록된 Basic minimap 키의 RenderTexture 활성화
+    _minimap.Run("Basic minimap");
 
     _minimapMinimizeButton.onClick.AddListener(OnClickMinimapMinimize);
     _minimapMaximizeButton.onClick.AddListener(OnClickMinimapMaximize);
@@ -142,4 +184,4 @@ private void ActiveExtendedMinimap(RenderTexture renderTexture)
 
 - MinimapTestScene에서는 미리 Minimap Creator로 생성된 Perspective Minimap, Orthographic Minimap을 할당하여, 각기 테스트를 수행할 수 있음.
 
-![image](./Resources/Images/Readme/minimaportho00.gif)
+![image](./Image/minimap-example.gif)
