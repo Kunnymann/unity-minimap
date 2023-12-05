@@ -102,7 +102,7 @@ Minimap Base가 공통적으로 갖는 프로퍼티입니다.
 | UniRX       | https://github.com/neuecc/UniRx    | 7.1.0   |
 | TextMeshPro | Unity package manager              | 3.0.6   |
 
-2. Unity Package를 다운 받아, Import합니다.
+2. [Unity Package](https://github.com/Kunnymann/unity-minimap/releases)를 다운 받아, Import합니다.
 
 ### 사용법
 
